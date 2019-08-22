@@ -1,0 +1,62 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+    <!-- Load passwords into properties -->
+    <include file="passwords.xml"/>
+
+    <!-- Create accounts -->
+    <changeSet id="create_account_my_app" author="jannik.arndt@holisticon.de">
+        <sql>
+            CREATE ROLE my_app WITH NOLOGIN;
+            CREATE ROLE my_app_tom WITH NOLOGIN IN ROLE my_app;
+            ALTER ROLE my_app_tom SET ROLE TO my_app;
+            CREATE ROLE my_app_jerry WITH NOLOGIN IN ROLE my_app;
+            ALTER ROLE my_app_jerry SET ROLE TO my_app;
+        </sql>
+        <rollback>
+            DROP ROLE my_app_jerry, my_app_tom;
+            REVOKE ALL ON SCHEMA my_schema FROM my_app;
+            REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA my_schema FROM my_app;
+            REVOKE USAGE ON SCHEMA my_schema FROM my_app;
+            REASSIGN OWNED BY my_app TO postgres;
+            DROP OWNED BY my_app; -- for privileges
+            DROP ROLE my_app;
+        </rollback>
+    </changeSet>
+
+    <!-- Set active role -->
+    <changeSet id="allow_login_for_my_app" author="jannik.arndt@holisticon.de" runOnChange="true">
+        <sql>
+            ALTER ROLE my_app_tom WITH LOGIN;
+            ALTER ROLE my_app_jerry WITH NOLOGIN;
+        </sql>
+    </changeSet>
+
+    <!-- Set Permissions / Grants -->
+    <changeSet id="grant_permissions_to_my_app" author="jannik.arndt@holisticon.de"
+               runOnChange="true">
+        <sqlFile path="my_app_grants.sql"/>
+    </changeSet>
+
+    <!-- Set Passwords -->
+    <changeSet id="set_passwords_dev" author="jannik.arndt@holisticon.de" context="dev or local"
+               runOnChange="true">
+        <sql>
+            ALTER ROLE my_app_tom WITH PASSWORD '${my_app_tom.password.dev}';
+            ALTER ROLE my_app_jerry WITH PASSWORD '${my_app_jerry.password.dev}';
+        </sql>
+        <rollback/>
+    </changeSet>
+
+    <changeSet id="set_passwords_prod" author="jannik.arndt@holisticon.de" context="prod"
+               runOnChange="true">
+        <sql>
+            ALTER ROLE my_app_tom WITH PASSWORD '${my_app_tom.password.prod}';
+            ALTER ROLE my_app_jerry WITH PASSWORD '${my_app_jerry.password.prod}';
+        </sql>
+        <rollback/>
+    </changeSet>
+
+</databaseChangeLog>
