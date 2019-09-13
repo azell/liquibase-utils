@@ -7,3 +7,8 @@ Liquibase generates a hash for every changeset and warns you, if a hash changed.
 To automatically have different passwords for prod and dev (and local), we use the context attribute. This is evaluated if you add --contexts=prod to the command line when running liquibase. Note that if you don’t provide the command line argument, the changeset will not be run at all.
 
 And lastly, the passwords are loaded from an external file, so you can make sure that this is either on the .gitignore list or encrypted (e.g. via git-crypt).
+
+https://aws.amazon.com/blogs/database/managing-postgresql-users-and-roles/
+https://docs.aws.amazon.com/secretsmanager/latest/userguide/managing-secrets.html
+https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.html#Appendix.PostgreSQL.CommonDBATasks.RestrictPasswordMgmt
